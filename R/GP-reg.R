@@ -25,16 +25,27 @@ get_log_ml <- function(Xtrain, y, length_scale, amplitude, sigma_sq = 0) {
 }
 
 # Optimize log marginal likelihood
-#   Optimizes over amplitude and length scale parameters at a fixed sigma_sq (default zero)
-get_log_ml_opt <- function(Xtrain, y, sigma_sq = 0) {
-  f <- function(x) {
-    theta <- exp(x[1])
-    ell <- exp(x[-1])
+#   Optimizes over amplitude and length scale parameters in noise-free case (sigma_sq = 0)
+get_log_ml_opt <- function(Xtrain, y) {
+
+  # negative log marginal likelihood function
+  f <- function(pars) {
+    theta <- exp(pars[1])
+    ell <- exp(pars[-1])
     logml <- tryCatch(get_log_ml(Xtrain, y, amplitude = theta, length_scale = ell),
                       error = function(e) -Inf, warning = function(e) -Inf)
     return(-logml)
   }
-  opt <- optim(c(0, rep(0, ncol(Xtrain))), f)
+
+  # starting values
+  theta_start <- 1
+  ell_start <- apply(Xtrain, 2, sd)
+  pars_start <- c(log(theta_start), log(ell_start))
+
+  # optimize
+  opt <- optim(pars_start, f)
+
+  # pack up results
   out <- opt
   out$theta <- exp(opt$par[1])
   out$ell <- exp(opt$par[-1])

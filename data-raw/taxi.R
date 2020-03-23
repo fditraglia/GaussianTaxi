@@ -1,5 +1,6 @@
 ## code to prepare `taxi` dataset goes here
 library(tidyverse)
+library(lubridate)
 library(haven)
 
 taxi <- read_dta('./data-raw/taxi034.dta')
@@ -32,7 +33,7 @@ taxi <- taxi %>%
          leisure = 24 - working,
          wage = earnings / driving,
          consumption = earnings / price) %>%
-  select(id, date, shift, earnings, driving, breaks, waiting, working, leisure, wage, consumption)
+  select(id, date, shift, earnings, driving, breaks, waiting, working, leisure, wage, price, consumption)
 
 usethis::use_data(taxi, overwrite = TRUE)
 rm(list = ls())
